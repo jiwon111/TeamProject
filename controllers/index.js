@@ -30,46 +30,40 @@ function PostTestAPI(req, res) {
 function KorHistoryAPI(req, res, next) {
     console.log("index/KorHistory router start");
     //시험일정
-    let url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
 
-    axios.get(url).then(html => {
-        let ulList = [];
-        let thList=[];
-        let tdList=[];
-        const $ = cheerio.load(html.data);
-        const $bodyList = $("div.right_contents").children("table");
-        //each : list 마다 함수 실행, forEach와 동일
-        $bodyList.each(function (i, elem) {
-            $('tbody tr').each(function(j, td){
-                // var child = $(this).children();
-                var thh= { th : $(this).find('th').text() }
-                // res.status(200).json(thh+"/");
-                alert(thh);
-                thList[j]=thh;
-            })
+    tabletojson.convertUrl(
+        'http://www.historyexam.go.kr/pageLink.do?link=examSchedule',
+        function (tablesAsJson) {
+            res.status(200).json({
+                tablesAsJson
+            });
+            // console.log(tablesAsJson[1]);
+        }
+    );
+    // let url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
 
-            // const $tableList = $(this).children("tbody tr");
-            // $tableList.each(function(j,elem2){
-            //     thList[j]={
-            //         "title" : $(this).find('th').text()
-            //     }
-            // })
-            ulList[i]=thList;
-
-            // ulList[i] = {
-            //     //find : 해당 태그가 있으면 그 요소 반환
-            //     title: $(this).find('th').text(),
-            //     // url: $(this).find('strong.news-tl a').attr('href'),
-            //     // image_url: $(this).find('p.poto a img').attr('src'),
-            //     // image_alt: $(this).find('p.poto a img').attr('alt'),
-            //     // summary: $(this).find('p.lead').text().slice(0, -11),
-            //     // date: $(this).find('span.p-time').text()
-            // };
-        });
-        const data = ulList;
-        //json으로 변환하여 app으로 전송
-        return res.json(data);
-    })
+    // axios.get(url).then(html => {
+    //     let ulList = [];
+    //     const $ = cheerio.load(html.data);
+    //     const $bodyList = $("div.right_contents").children("table tbody");
+    //     //each : list 마다 함수 실행, forEach와 동일
+    //     $bodyList.each(function (i, elem) {
+    //         // var tabledata=$(this).find("th").text();
+    //         // console.log("th : "+tabledata );
+    //         ulList[i] = {
+    //         //     //find : 해당 태그가 있으면 그 요소 반환
+    //             title: $(this).find('tr').text(),
+    //         //     // url: $(this).find('strong.news-tl a').attr('href'),
+    //         //     // image_url: $(this).find('p.poto a img').attr('src'),
+    //         //     // image_alt: $(this).find('p.poto a img').attr('alt'),
+    //         //     // summary: $(this).find('p.lead').text().slice(0, -11),
+    //         //     // date: $(this).find('span.p-time').text()
+    //         };
+    //     });
+    //     const data = ulList.filter(n=>n.title);
+    //     //json으로 변환하여 app으로 전송
+    //     return res.json(data);
+    // })
 }
 
 
