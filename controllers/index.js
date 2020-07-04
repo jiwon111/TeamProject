@@ -2,7 +2,6 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const tabletojson = require("tabletojson").Tabletojson; 
 
-
 function basicAPI(req, res) {
     // res.status(200).json({
     //     "success":true
@@ -30,7 +29,7 @@ function PostTestAPI(req, res) {
 function KorHistoryAPI(req, res, next) {
     console.log("index/KorHistory router start");
     //시험일정
-
+    //테이블가져오기
     tabletojson.convertUrl(
         'http://www.historyexam.go.kr/pageLink.do?link=examSchedule',
         function (tablesAsJson) {
