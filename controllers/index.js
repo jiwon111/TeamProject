@@ -37,7 +37,6 @@ function KorHistoryAPI(req, res, next) {
             res.status(200).json({
                 tablesAsJson
             });
-            // console.log(tablesAsJson[0][0]);
         }
     );
 }
