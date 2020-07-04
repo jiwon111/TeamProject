@@ -37,44 +37,10 @@ function KorHistoryAPI(req, res, next) {
             res.status(200).json({
                 tablesAsJson
             });
-            // console.log(tablesAsJson[1]);
+            // console.log(tablesAsJson[0][0]);
         }
     );
-    // let url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
-
-    // axios.get(url).then(html => {
-    //     let ulList = [];
-    //     const $ = cheerio.load(html.data);
-    //     const $bodyList = $("div.right_contents").children("table tbody");
-    //     //each : list 마다 함수 실행, forEach와 동일
-    //     $bodyList.each(function (i, elem) {
-    //         // var tabledata=$(this).find("th").text();
-    //         // console.log("th : "+tabledata );
-    //         ulList[i] = {
-    //         //     //find : 해당 태그가 있으면 그 요소 반환
-    //             title: $(this).find('tr').text(),
-    //         //     // url: $(this).find('strong.news-tl a').attr('href'),
-    //         //     // image_url: $(this).find('p.poto a img').attr('src'),
-    //         //     // image_alt: $(this).find('p.poto a img').attr('alt'),
-    //         //     // summary: $(this).find('p.lead').text().slice(0, -11),
-    //         //     // date: $(this).find('span.p-time').text()
-    //         };
-    //     });
-    //     const data = ulList.filter(n=>n.title);
-    //     //json으로 변환하여 app으로 전송
-    //     return res.json(data);
-    // })
 }
-
-
-// 'use strict';
-// tabletojson.convertUrl(
-//   'https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes',
-//   function(tablesAsJson) {
-//       console.log(tablesAsJson[1]);
-//   }
-// );
-
 
 
 
