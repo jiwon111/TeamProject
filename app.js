@@ -13,6 +13,12 @@ const cheerio = require("cheerio");
 const tabletojson = require("tabletojson").Tabletojson; 
 
 
+var mysql = require('mysql');
+
+
+
+
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -31,9 +37,6 @@ app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-
-
 
 
 // catch 404 and forward to error handler

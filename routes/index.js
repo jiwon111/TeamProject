@@ -2,8 +2,10 @@ var express = require('express');
 const axios = require("axios");
 const cheerio = require("cheerio");
 const tabletojson = require("tabletojson").Tabletojson; 
+var mysql = require('mysql');
 
 var router = express.Router();
+
 
 const userController = require('../controllers');
 
@@ -51,6 +53,11 @@ router.get('/html_test', userController.HtmlTestAPI);
 // });
 
 router.get('/KorHistory', userController.KorHistoryAPI);
+
+
+//db연결 
+router.get('/db', userController.DBConnectAPI);
+
 
 
 

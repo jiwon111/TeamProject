@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const tabletojson = require("tabletojson").Tabletojson; 
+const tabletojson = require("tabletojson").Tabletojson;
+var mysql = require('mysql');
 
 function basicAPI(req, res) {
     // res.status(200).json({
@@ -11,7 +12,7 @@ function basicAPI(req, res) {
 }
 
 function GetTestAPI(req, res) {
-    const message="this is message";
+    const message = "this is message";
     res.status(200).json(message);
     console.log("index/test router clear");
 }
@@ -30,19 +31,46 @@ function KorHistoryAPI(req, res, next) {
     console.log("index/KorHistory router start");
     //시험일정
     //테이블가져오기
-    tabletojson.convertUrl(
-        'http://www.historyexam.go.kr/pageLink.do?link=examSchedule',
-        function (tablesAsJson) {
-            res.status(200).json({
-                tablesAsJson
-            });
-        }
-    );
+
+    var url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
+    tabletojson.convertUrl(url).then(function (tablesAsJson) {
+        var table = tablesAsJson[0][0];
+        // var ff= table[0];
+        var sss= table.구분;
+        res.status(200).json({
+            sss
+        });
+    });
+
+    // console.log(tablesAsJson);
+
 }
 
 
 
 
+function DBConnectAPI(req, res, next) {
+    var db_info = {
+        host: 'localhost',
+        port:'3306',
+        user: 'root',
+        password: 'password',
+        database: 'project'
+    }
+    
+    var connection = mysql.createConnection(db_info);
+    
+    connection.query('show tables;',function(err, result) {
+    if (err) throw err;
+    console.log("Connected!");
+    // console.log("show table :" + result);
+    res.status(200).json({
+        result
+    });
+
+  });
+    connection.end();
+}
 
 
 
@@ -74,12 +102,13 @@ function HtmlTestAPI(req, res, next) {
         return res.json(data);
     })
 }
-   
+
 
 module.exports = {
     basicAPI: basicAPI,
     GetTestAPI: GetTestAPI,
     PostTestAPI: PostTestAPI,
     HtmlTestAPI: HtmlTestAPI,
-    KorHistoryAPI:KorHistoryAPI,
+    KorHistoryAPI: KorHistoryAPI,
+    DBConnectAPI: DBConnectAPI,
 }

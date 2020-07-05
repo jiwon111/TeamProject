@@ -37,11 +37,36 @@ const cheerio = require("cheerio");
 //   }
 // );
 
-$ = cheerio.load(html.toString());
-var data = [];
-$('table tr td table tr').each(function (i, td) {
 
-    var children = $(this).children();
-    var itemNum = children.eq(0);
-    var itemName = children.eq(1);
-});
+//cheerio test
+// $ = cheerio.load(html.toString());
+// var data = [];
+// $('table tr td table tr').each(function (i, td) {
+
+//     var children = $(this).children();
+//     var itemNum = children.eq(0);
+//     var itemName = children.eq(1);
+// });
+
+
+
+var mysql = require('mysql');
+var db_info = {
+    host: 'localhost',
+    port:'3306',
+    user: 'root',
+    password: 'password',
+    database: 'project'
+}
+
+var connection = mysql.createConnection(db_info);
+
+
+connection.query('show tables;',function(err, result) {
+    if (err) throw err;
+    console.log("Connected!");
+    console.log("show table :" + result);
+
+  });
+
+connection.end();
