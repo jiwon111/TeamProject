@@ -62,11 +62,17 @@ var db_info = {
 var connection = mysql.createConnection(db_info);
 
 
-connection.query('show tables;',function(err, result) {
-    if (err) throw err;
-    console.log("Connected!");
-    console.log("show table :" + result);
+// connection.query("insert into user_info values('3','user3','password','email3@email.com','공대','컴퓨터공학과','.');",function(err, results, fields) {
+//   console.log("insert!");
+//   console.log(arguments);
 
-  });
+// });
+
+connection.query("select * from user_info;",function(err, results, fields) {
+  console.log("select!");
+  for(var i =0; i<results.length; i++){
+    console.log(results[i]);
+  }
+});
 
 connection.end();

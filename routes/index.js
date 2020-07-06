@@ -6,7 +6,6 @@ var mysql = require('mysql');
 
 var router = express.Router();
 
-
 const userController = require('../controllers');
 
 /* GET home page. */
@@ -55,9 +54,9 @@ router.get('/html_test', userController.HtmlTestAPI);
 router.get('/KorHistory', userController.KorHistoryAPI);
 
 
-//db연결 
+//db연결 test
 router.get('/db', userController.DBConnectAPI);
-
+router.get('/db_insert', userController.DBInsertAPI);
 
 
 

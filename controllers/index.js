@@ -36,7 +36,7 @@ function KorHistoryAPI(req, res, next) {
     tabletojson.convertUrl(url).then(function (tablesAsJson) {
         var table = tablesAsJson[0][0];
         // var ff= table[0];
-        var sss= table.구분;
+        var sss = table.구분;
         res.status(200).json({
             sss
         });
@@ -46,34 +46,49 @@ function KorHistoryAPI(req, res, next) {
 
 }
 
+var db_info = {
+    host: 'localhost',
+    port: '3306',
+    user: 'root',
+    password: 'password',
+    database: 'project'
+}
 
+var connection = mysql.createConnection(db_info);
 
 
 function DBConnectAPI(req, res, next) {
-    var db_info = {
-        host: 'localhost',
-        port:'3306',
-        user: 'root',
-        password: 'password',
-        database: 'project'
-    }
-    
-    var connection = mysql.createConnection(db_info);
-    
-    connection.query('show tables;',function(err, result) {
-    if (err) throw err;
-    console.log("Connected!");
-    // console.log("show table :" + result);
-    res.status(200).json({
-        result
+    connection.query("select * from user_info", function (err, results, fields) {
+        if (err) throw err;
+        console.log("Connected!");
+        var dataList = [];
+        for (var i = 0; i < results.length; i++) {
+            dataList.push(results[i]);
+        }
+        res.status(200).json({
+            dataList
+        });
     });
-
-  });
-    connection.end();
+    // connection.end();
 }
 
+function DBInsertAPI(req, res, next) {
+    console.log("insert!");
+    connection.query("insert into user_info values('4','user4','password','email4@email.com','공대','컴퓨터공학과','.');", function (err, results) {
+        // console.log(arguments);
+        //insert 성공 확인
+        if (results.affectedRows > 0) {
+            console.log("1");
+            res.redirect("/db");
+            // res.status(200).json({ message: 'insert success' });
+        } else {
+            console.log("0");
 
+            // res.status(200).json({ message: 'insert fail' });
+        }
 
+    });
+}
 
 
 
@@ -111,4 +126,6 @@ module.exports = {
     HtmlTestAPI: HtmlTestAPI,
     KorHistoryAPI: KorHistoryAPI,
     DBConnectAPI: DBConnectAPI,
+    DBInsertAPI: DBInsertAPI,
+
 }
