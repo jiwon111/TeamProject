@@ -16,6 +16,8 @@ var fs = require('fs');
 const axios = require("axios");
 const cheerio = require("cheerio");
 var mysql = require('mysql');
+const request = require('request');
+const convert = require('xml-js');
 
 'use strict';
 const tabletojson = require("tabletojson").Tabletojson; 
