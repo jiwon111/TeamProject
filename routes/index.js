@@ -3,6 +3,8 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const tabletojson = require("tabletojson").Tabletojson; 
 var mysql = require('mysql');
+const request = require('request');
+const convert = require('xml-js');
 
 var router = express.Router();
 
@@ -28,6 +30,16 @@ router.post('/submit',userController.submitAPI);
 
 //한국사
 router.get('/KorHistory', userController.KorHistoryAPI);
+
+//토익 일정, 수수료
+router.get('/ToeicCalendar', userController.ToeicCalendarAPI);
+router.get('/ToeicReceipt', userController.ToeicReceiptAPI);
+
+//큐넷
+router.get('/EngineerCalendar', userController.EngineerCalendarAPI);
+router.get('/FunctionalCalendar', userController.FunctionalCalendarAPI);
+router.get('/TechnicianCalendar', userController.TechnicianCalendarAPI);
+router.get('/IndustrialEngineerCalendar', userController.IndustrialEngineerCalendarAPI);
 
 
 //db연결 test
