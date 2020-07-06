@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-// const log = console.log;
+'use strict';
+const tabletojson = require("tabletojson").Tabletojson; 
 
 //html 동기로 가져오기
 // const getHtml = async () => {
@@ -68,11 +69,87 @@ var connection = mysql.createConnection(db_info);
 
 // });
 
-connection.query("select * from user_info;",function(err, results, fields) {
-  console.log("select!");
-  for(var i =0; i<results.length; i++){
-    console.log(results[i]);
-  }
-});
+// connection.query("select * from user_info;",function(err, results, fields) {
+//   console.log("select!");
+//   for(var i =0; i<results.length; i++){
+//     console.log(results[i]);
+//   }
+// });
 
-connection.end();
+
+var StringToDate = function(str){
+  var y = str.split("년 ")[0];
+  var md = str.split("년 ")[1];
+  var m = md.split("월 ")[0];
+  var d = md.split("월 ")[1].split("일")[0];
+  // console.log(y +"/"+ m+ "/"+ d);
+  // var date = new Date(y,m,d).toUTCString();
+  var date = y+"-"+m+"-"+d;
+  console.log(date);
+  return date;
+}
+
+var InsertCertificate = function(time){
+  // for (var j = 0; j < 5; j++) {
+      // console.log(i);
+      var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+      var params = [time, '한국사능력검정시험', '자격증', '.'];
+      connection.query(sql, params, function (err, results) {
+          console.log("aa");
+      });
+      return 'insert end';
+  // }
+}
+
+
+var time=[];
+var s_date=[];
+var e_date=[];
+var d_date=[];
+var r_date=[];
+var KorHistory = function() {
+  console.log("index/KorHistory router start");
+  //시험일정
+  //테이블가져오기
+
+  var url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
+  tabletojson.convertUrl(url).then(function (tablesAsJson) {
+      var TableList=tablesAsJson[0];
+      for (var i = 0; i < 5; i++) {
+          
+          var table = TableList[i];
+          
+          time[i] = table.구분;
+          
+          var s2e = table.접수기간;
+          var start = s2e.split(" ~ ")[0];
+          var end = s2e.split(" ~ ")[1];
+          s_date[i] = StringToDate(start);
+          e_date[i] = StringToDate(end);
+          
+          var examday = table.시험일시;
+          d_date[i] = StringToDate(examday);
+
+          var resultday = table.합격자발표;
+          r_date[i] = StringToDate(resultday);
+          var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+          var params = [time[i], '한국사능력검정시험', '자격증', '.'];
+          connection.query(sql, params, function (err, results) {
+            if(err){console.log("err"); throw err;}
+            else { console.log("aaa");}
+          }
+          )
+      }
+      //dbinsert 
+      console.log("time end");
+
+  });
+  console.log("table end");
+}
+
+
+KorHistory();
+
+
+
+// connection.end();

@@ -8,12 +8,11 @@ var http = require('http');
 var fs = require('fs');
 const axios = require("axios");
 const cheerio = require("cheerio");
+var mysql = require('mysql');
 
 'use strict';
 const tabletojson = require("tabletojson").Tabletojson; 
 
-
-var mysql = require('mysql');
 
 
 
@@ -37,6 +36,27 @@ app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // catch 404 and forward to error handler

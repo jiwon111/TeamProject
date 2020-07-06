@@ -51,6 +51,7 @@ router.get('/html_test', userController.HtmlTestAPI);
 //   })
 // });
 
+//한국사
 router.get('/KorHistory', userController.KorHistoryAPI);
 
 
