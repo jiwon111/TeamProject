@@ -4,51 +4,48 @@ const tabletojson = require("tabletojson").Tabletojson;
 var mysql = require('mysql');
 
 function basicAPI(req, res) {
-    // res.status(200).json({
-        //     "success":true
-        //   });
-        res.redirect('basic.html');
-        console.log("index router clear");
-    }
+    res.render('index',{});
+}
     
-//TEST------------------------------------------------------------------
-function GetTestAPI(req, res) {
-    const message = "this is message";
-    res.status(200).json(message);
-    console.log("index/test router clear");
+function searchAPI(req, res) {
+    var request = req.query.searchKey;
+    console.log(request);
+    res.render('search',{request});
 }
 
-function PostTestAPI(req, res) {
-    const user_message = req.body.message;
-    res.status(200).json({
-        "message": user_message
-    });
-    console.log("index/post_test router clear");
+function mypageAPI(req,res){
+    res.render('mypage',{});
 }
 
-function HtmlTestAPI(req, res, next) {
-    console.log("index/html_test router start");
-    let url = 'https://www.yna.co.kr/sports/all';
-    axios.get(url).then(html => {
-        let ulList = [];
-        const $ = cheerio.load(html.data);
-        const $bodyList = $("div.list-type038 ul").children("li");
-        //each : list 마다 함수 실행, forEach와 동일
-        $bodyList.each(function (i, elem) {
-            ulList[i] = {
-                //find : 해당 태그가 있으면 그 요소 반환
-                title: $(this).find('a strong.tit-news').text(),
-                // url: $(this).find('strong.news-tl a').attr('href'),
-                // image_url: $(this).find('p.poto a img').attr('src'),
-                // image_alt: $(this).find('p.poto a img').attr('alt'),
-                // summary: $(this).find('p.lead').text().slice(0, -11),
-                // date: $(this).find('span.p-time').text()
-            };
-        });
-        const data = ulList.filter(n => n.title);
-        //json으로 변환하여 app으로 전송
-        return res.json(data);
-    })
+function joinAPI(req,res){
+    res.render('join',{});
+}
+
+function loginAPI(req,res){
+    res.render('login',{});
+}
+
+function boardAPI(req,res){
+    res.render('board',{});
+}
+
+function testAPI(req,res){
+    res.render('test',{});
+}
+
+function test2API(req,res){
+    res.render('test2',{});
+}
+
+function join2API(req,res){
+    var result = req.body
+    console.log(result);
+    res.render('join2',{result});
+}
+
+function submitAPI(req,res){
+    var request = req.body;
+    console.log(request);
 }
 
 
@@ -213,11 +210,62 @@ function DBInsertAPI(req, res, next) {
 
 module.exports = {
     basicAPI: basicAPI,
-    GetTestAPI: GetTestAPI,
-    PostTestAPI: PostTestAPI,
-    HtmlTestAPI: HtmlTestAPI,
+    searchAPI: searchAPI,
+    mypageAPI: mypageAPI,
+    joinAPI: joinAPI,
+    loginAPI: loginAPI,
+    boardAPI: boardAPI,
+    testAPI: testAPI,
+    test2API: test2API,
+    join2API: join2API,
+    submitAPI: submitAPI,
+
     KorHistoryAPI: KorHistoryAPI,
     DBConnectAPI: DBConnectAPI,
     DBInsertAPI: DBInsertAPI,
-
+    
+    // GetTestAPI: GetTestAPI,
+    // PostTestAPI: PostTestAPI,
+    // HtmlTestAPI: HtmlTestAPI,
 }
+
+
+//TEST------------------------------------------------------------------
+// function GetTestAPI(req, res) {
+//     const message = "this is message";
+//     res.status(200).json(message);
+//     console.log("index/test router clear");
+// }
+
+// function PostTestAPI(req, res) {
+//     const user_message = req.body.message;
+//     res.status(200).json({
+//         "message": user_message
+//     });
+//     console.log("index/post_test router clear");
+// }
+
+// function HtmlTestAPI(req, res, next) {
+//     console.log("index/html_test router start");
+//     let url = 'https://www.yna.co.kr/sports/all';
+//     axios.get(url).then(html => {
+//         let ulList = [];
+//         const $ = cheerio.load(html.data);
+//         const $bodyList = $("div.list-type038 ul").children("li");
+//         //each : list 마다 함수 실행, forEach와 동일
+//         $bodyList.each(function (i, elem) {
+//             ulList[i] = {
+//                 //find : 해당 태그가 있으면 그 요소 반환
+//                 title: $(this).find('a strong.tit-news').text(),
+//                 // url: $(this).find('strong.news-tl a').attr('href'),
+//                 // image_url: $(this).find('p.poto a img').attr('src'),
+//                 // image_alt: $(this).find('p.poto a img').attr('alt'),
+//                 // summary: $(this).find('p.lead').text().slice(0, -11),
+//                 // date: $(this).find('span.p-time').text()
+//             };
+//         });
+//         const data = ulList.filter(n => n.title);
+//         //json으로 변환하여 app으로 전송
+//         return res.json(data);
+//     })
+// }

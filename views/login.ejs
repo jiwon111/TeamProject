@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <%- include ("./common/head") %>
+</head>
+<script>
+    function checkform(){
+        if(!document.loginForm.user_id.value){
+            alert("아이디를 입력하세요");
+            document.loginForm.user_id.focus();
+            return;
+        }
+        if(!document.loginForm.user_pw.value){
+            alert("비밀번호를 입력하세요");
+            document.loginForm.user_pw.focus();
+            return;
+        }
+            document.loginForm.submit();
+    }
+</script>
+<body>
+    <div id="wrap">
+        <!------------------- 상단 navbar ------------------->
+        <header>
+            <%- include ("./common/navbar") %>
+        </header>
+
+
+            <div class="join-wrap">
+                <div class="wrap-header">
+                    <h3>로그인</h3>
+                    <p>안녕하세요 자비스 입니다:)</p>
+                </div>
+                <div class="join-input">
+                    <form name=loginForm method="post" action="/login">
+                        <dl>
+                            <dd><input type="text" name="user_id" placeholder="아이디""></dd>
+                        </dl>
+                        <dl>
+                            <dd><input type="password" name="user_pw" placeholder="비밀번호"></dd>
+                        </dl>
+                        <button type="button" class="btn" onclick="checkform()">로그인</button>
+                        <dl class="bottom-letter">
+                            <input type="checkbox">로그인유지 | </input>
+                            <a href="/join">회원가입</a>
+                        </dl>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        
+    </body>
+</html>
