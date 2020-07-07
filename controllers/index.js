@@ -8,7 +8,7 @@ var mysql = require('mysql');
 function basicAPI(req, res) {
     res.render('index',{});
 }
-    
+
 function searchAPI(req, res) {
     var request = req.query.searchKey;
     console.log(request);
@@ -66,7 +66,7 @@ var StringToDate = function(str){
     console.log(date);
     return date;
   }
-  
+
   var InsertCertificate = function(time){
     // for (var j = 0; j < 5; j++) {
         // console.log(i);
@@ -77,8 +77,8 @@ var StringToDate = function(str){
         });
     // }
   }
-  
-  
+
+
   var time=[];
   var s_date=[];
   var e_date=[];
@@ -90,16 +90,16 @@ function KorHistoryAPI(req, res) {
     console.log("index/KorHistory router start");
     //시험일정
     //테이블가져오기
-  
+
     var url = 'http://www.historyexam.go.kr/pageLink.do?link=examSchedule';
     tabletojson.convertUrl(url).then(function (tablesAsJson) {
         var TableList=tablesAsJson[0];
         for (var i = 0; i < 5; i++) {
-            
+
             var table = TableList[i];
-            
+
             time[i] = table.구분;
-            
+
             var s2e = table.접수기간;
             var start = s2e.split(" ~ ")[0];
             var end = s2e.split(" ~ ")[1];
@@ -112,7 +112,7 @@ function KorHistoryAPI(req, res) {
             var resultday = table.합격자발표;
             r_date[i] = StringToDate(resultday);
 
-            //dbinsert 
+            //dbinsert
             var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
             var params = [time[i], '한국사능력검정시험', '자격증', '.'];
             connection.query(sql, params, function (err, results) {
@@ -193,91 +193,287 @@ function ToeicReceiptAPI(req, res, next) {
 
 //큐넷------------------------------------------------------------------
 //기술사 시험 시행일정 조회
-function EngineerCalendarAPI(req, res, next){
-  console.log("index/EngineerCalendar router start");
+var Engineer_time = [];
+var Engineer_s_date = [];
+var Engineer_e_date = [];
+var Engineer_d_date = [];
+var Engineer_r_date = [];
 
-  var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getPEList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+//json 깊이 수정
+const RemoveJsonTextAttribute = (value, parentElement) => {
+    try {
+        const keyNo = Object.keys(parentElement._parent).length;
+        const keyName = Object.keys(parentElement._parent)[keyNo - 1];
+        parentElement._parent[keyName] = value;
+    } catch (e) {
+        console.log(e);
+    }
+};
 
-  request.get(requestUrl, (err, res, body)=> {
+var SpliteEngineerInfo = function (str, i) {
+    Engineer_time[i] = str.description.split('제')[1].split(")")[0];
+    Engineer_s_date[i] = str.docregstartdt;
+    Engineer_e_date[i] = str.docregenddt;
+    Engineer_d_date[i] = str.docexamdt;
+    Engineer_r_date[i] = str.pracpassdt;
 
-     if(err) {
-           console.log(`err => ${err}`)
-     }
-    else {
-        if(res.statusCode == 200) {
-                  var result = body
-                  console.log(`body data => ${result}`)
-                  var xmlToJson = convert.xml2json(result, {compact: true, spaces: 4});
-                  console.log(`xml to json => ${xmlToJson}`)
-         }
-     }
-  });
+    console.log("time : " + Engineer_time[i] + Engineer_s_date[i] + Engineer_e_date[i] + Engineer_d_date[i] + Engineer_r_date[i]);
+}
+
+
+
+function EngineerCalendarAPI(req, res, next) {
+    console.log("index/EngineerCalendar router start");
+
+    var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getPEList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+
+    request.get(requestUrl, (err, resp, body) => {
+
+        if (err) {
+            console.log(`err => ${err}`)
+        }
+        if (resp.statusCode == 200) {
+            var result = body
+            // console.log(`body data => ${result}`);
+            var xmlToJson = convert.xml2json(result, { compact: true, spaces: 4, textFn: RemoveJsonTextAttribute });
+            var jsonData = JSON.parse(xmlToJson);
+
+            // console.log(`xml to json => ${xmlToJson}`);
+            var items = jsonData.response.body.items;
+
+            for (var j = 0; j < items.item.length; j++) {
+                // Engineer_time[j]=items.item[j].description;
+                // console.log(Engineer_time[j]);
+                SpliteEngineerInfo(items.item[j], j);
+
+                //dbinsert certificate
+                var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+                var params = [Engineer_time[j], '기술사', '기술사', '.'];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Engineer insert success "); }
+                });
+
+                //dbinsert certificate_date
+                sql = "insert into certificate_date(name, d_day, apply_start, apply_end, result_release) values(?,?,?,?,?);";
+                params = ['기술사', Engineer_d_date[j], Engineer_s_date[j], Engineer_e_date[j], Engineer_r_date[j]];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Engineer insert success 2"); }
+                });
+            }
+
+
+            res.status(200).json(items);
+
+        }
+    });
 }
 
 //기능장 시험 시행일정 조회
-function FunctionalCalendarAPI(req, res, next){
-  console.log("index/FunctionalCalendar router start");
+var Functional_time = [];
+var Functional_s_date = [];
+var Functional_e_date = [];
+var Functional_d_date = [];
+var Functional_r_date = [];
 
-  var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getMCList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+//json 깊이 수정
+/*const RemoveJsonTextAttribute = (value, parentElement) => {
+    try {
+        const keyNo = Object.keys(parentElement._parent).length;
+        const keyName = Object.keys(parentElement._parent)[keyNo - 1];
+        parentElement._parent[keyName] = value;
+    } catch (e) {
+        console.log(e);
+    }
+};*/
 
-  request.get(requestUrl, (err, res, body)=> {
+var SpliteFunctionalInfo = function (str, i) {
+    Functional_time[i] = str.description.split('제')[1].split(")")[0];
+    Functional_s_date[i] = str.docregstartdt;
+    Functional_e_date[i] = str.docregenddt;
+    Functional_d_date[i] = str.docexamdt;
+    Functional_r_date[i] = str.pracpassdt;
 
-     if(err) {
-           console.log(`err => ${err}`)
-     }
-    else {
-        if(res.statusCode == 200) {
-                  var result = body
-                  console.log(`body data => ${result}`)
-                  var xmlToJson = convert.xml2json(result, {compact: true, spaces: 4});
-                  console.log(`xml to json => ${xmlToJson}`)
-         }
-     }
-  });
+    console.log("time : " + Functional_time[i] + Functional_s_date[i] + Functional_e_date[i] + Functional_d_date[i] + Functional_r_date[i]);
+}
+
+function FunctionalCalendarAPI(req, res, next) {
+    console.log("index/FunctionalCalendar router start");
+
+    var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getMCList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+
+    request.get(requestUrl, (err, resp, body) => {
+
+        if (err) {
+            console.log(`err => ${err}`)
+        }
+        if (resp.statusCode == 200) {
+            var result = body
+            // console.log(`body data => ${result}`);
+            var xmlToJson = convert.xml2json(result, { compact: true, spaces: 4, textFn: RemoveJsonTextAttribute });
+            var jsonData = JSON.parse(xmlToJson);
+
+            // console.log(`xml to json => ${xmlToJson}`);
+            var items = jsonData.response.body.items;
+
+            for (var j = 0; j < items.item.length; j++) {
+                // Functional_time[j]=items.item[j].description;
+                // console.log(Engineer_time[j]);
+                SpliteFunctionalInfo(items.item[j], j);
+
+                //dbinsert certificate
+                var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+                var params = [Functional_time[j], '기능장', '기능장', '.'];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Functional insert success "); }
+                });
+
+                //dbinsert certificate_date
+                sql = "insert into certificate_date(name, d_day, apply_start, apply_end, result_release) values(?,?,?,?,?);";
+                params = ['기능장', Functional_d_date[j], Functional_s_date[j], Functional_e_date[j], Functional_r_date[j]];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Functional insert success 2"); }
+                });
+            }
+
+
+            res.status(200).json(items);
+
+        }
+    });
 }
 
 //기사, 산업기사 시험 시행일정 조회
-function IndustrialEngineerCalendarAPI(req, res, next){
-  console.log("index/IndustrialEngineerCalendar router start");
+var Industrial_time = [];
+var Industrial_s_date = [];
+var Industrial_e_date = [];
+var Industrial_d_date = [];
+var Industrial_r_date = [];
 
-  var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getEList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+var SpliteIndustrialInfo = function (str, i) {
+    Industrial_time[i] = str.description.split('제')[1].split(")")[0];
+    Industrial_s_date[i] = str.docregstartdt;
+    Industrial_e_date[i] = str.docregenddt;
+    Industrial_d_date[i] = str.docexamdt;
+    Industrial_r_date[i] = str.pracpassdt;
 
-  request.get(requestUrl, (err, res, body)=> {
+    console.log("time : " + Industrial_time[i] + Industrial_s_date[i] + Industrial_e_date[i] + Industrial_d_date[i] + Industrial_r_date[i]);
+}
 
-     if(err) {
-           console.log(`err => ${err}`)
-     }
-    else {
-        if(res.statusCode == 200) {
-                  var result = body
-                  console.log(`body data => ${result}`)
-                  var xmlToJson = convert.xml2json(result, {compact: true, spaces: 4});
-                  console.log(`xml to json => ${xmlToJson}`)
-         }
-     }
-  });
+function IndustrialEngineerCalendarAPI(req, res, next) {
+    console.log("index/IndustrialEngineerCalendar router start");
+
+    var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getEList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+
+    request.get(requestUrl, (err, resp, body) => {
+
+        if (err) {
+            console.log(`err => ${err}`)
+        }
+        if (resp.statusCode == 200) {
+            var result = body
+            // console.log(`body data => ${result}`);
+            var xmlToJson = convert.xml2json(result, { compact: true, spaces: 4, textFn: RemoveJsonTextAttribute });
+            var jsonData = JSON.parse(xmlToJson);
+
+            // console.log(`xml to json => ${xmlToJson}`);
+            var items = jsonData.response.body.items;
+
+            for (var j = 0; j < items.item.length; j++) {
+                // Functional_time[j]=items.item[j].description;
+                // console.log(Engineer_time[j]);
+                SpliteIndustrialInfo(items.item[j], j);
+
+                //dbinsert certificate
+                var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+                var params = [Industrial_time[j], '기사,산업기사', '기사,산업기사', '.'];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Industrial insert success "); }
+                });
+
+                //dbinsert certificate_date
+                sql = "insert into certificate_date(name, d_day, apply_start, apply_end, result_release) values(?,?,?,?,?);";
+                params = ['기사,산업기사', Industrial_d_date[j], Industrial_s_date[j], Industrial_e_date[j], Industrial_r_date[j]];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Industrial insert success 2"); }
+                });
+            }
+
+
+            res.status(200).json(items);
+
+        }
+    });
 }
 
 //기능사 시험 시행일정 조회
-function TechnicianCalendarAPI(req, res, next){
-  console.log("index/TechnicianCalendar router start");
+var Technician_time = [];
+var Technician_s_date = [];
+var Technician_e_date = [];
+var Technician_d_date = [];
+var Technician_r_date = [];
 
-  var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getCList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&stdt=2020&'
+var SpliteTechnicianInfo = function (str, i) {//(2020년도 제1회)
+    Technician_time[i] = str.description.split('사 ')[1];
+    Technician_s_date[i] = str.docregstartdt;
+    Technician_e_date[i] = str.docregenddt;
+    Technician_d_date[i] = str.docexamdt;
+    Technician_r_date[i] = str.pracpassdt;
 
-  request.get(requestUrl, (err, res, body)=> {
+    console.log("time : " + Technician_time[i] + Technician_s_date[i] + Technician_e_date[i] + Technician_d_date[i] + Technician_r_date[i]);
+}
 
-     if(err) {
-           console.log(`err => ${err}`)
-     }
-    else {
-        if(res.statusCode == 200) {
-                  var result = body
-                  console.log(`body data => ${result}`)
-                  var xmlToJson = convert.xml2json(result, {compact: true, spaces: 4});
-                  console.log(`xml to json => ${xmlToJson}`)
-         }
-     }
-  });
+function TechnicianCalendarAPI(req, res, next) {
+    console.log("index/TechnicianCalendar router start");
+
+    var requestUrl = 'http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getCList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&'
+
+    request.get(requestUrl, (err, resp, body) => {
+
+        if (err) {
+            console.log(`err => ${err}`)
+        }
+        if (resp.statusCode == 200) {
+            var result = body
+            // console.log(`body data => ${result}`);
+            var xmlToJson = convert.xml2json(result, { compact: true, spaces: 4, textFn: RemoveJsonTextAttribute });
+            var jsonData = JSON.parse(xmlToJson);
+
+            // console.log(`xml to json => ${xmlToJson}`);
+            var items = jsonData.response.body.items;
+
+            for (var j = 0; j < items.item.length; j++) {
+                // Functional_time[j]=items.item[j].description;
+                // console.log(Engineer_time[j]);
+                SpliteTechnicianInfo(items.item[j], j);
+
+                //dbinsert certificate
+                var sql = "insert into certificate(time, name, type, organizer) values(?,?,?,?);";
+                var params = [Technician_time[j], '정기 기능사', '정기 기능사', '.'];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Technician insert success "); }
+                });
+
+                //dbinsert certificate_date
+                sql = "insert into certificate_date(name, d_day, apply_start, apply_end, result_release) values(?,?,?,?,?);";
+                params = ['정기 기능사', Technician_d_date[j], Technician_s_date[j], Technician_e_date[j], Technician_r_date[j]];
+                connection.query(sql, params, function (err, results) {
+                    if (err) { console.log("err"); throw err; }
+                    else { console.log("Technician insert success 2"); }
+                });
+            }
+
+
+            res.status(200).json(items);
+
+        }
+    });
 }
 
 //종목별 응시수수료 조회>요청변수 종목코드? >http://openapi.q-net.or.kr/api/service/rest/InquiryTestInformationNTQSVC/getFeeList?serviceKey=hF0yNmEeBbUo9AfcpeOObbn3XMqzqbO%2BAM45bdxziuTwH8fiUa6DuS6DHcgvWG2BIYovlkYGfXEW9Faj7BXmxQ%3D%3D&jmcd=1320&
@@ -319,10 +515,10 @@ function TechnicianCalendarAPI(req, res, next){
 
 //DB---------------------------------------------------------
 var db_info = {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: '3306',
     user: 'root',
-    password: 'password',
+    password: '337878',
     database: 'project'
 }
 
@@ -380,10 +576,10 @@ module.exports = {
     submitAPI: submitAPI,
 
     KorHistoryAPI: KorHistoryAPI,
-    
+
     ToeicCalendarAPI: ToeicCalendarAPI,
     ToeicReceiptAPI: ToeicReceiptAPI,
-    
+
     EngineerCalendarAPI: EngineerCalendarAPI,
     FunctionalCalendarAPI: FunctionalCalendarAPI,
     IndustrialEngineerCalendarAPI: IndustrialEngineerCalendarAPI,
@@ -391,7 +587,7 @@ module.exports = {
 
     DBConnectAPI: DBConnectAPI,
     DBInsertAPI: DBInsertAPI,
-    
+
     // GetTestAPI: GetTestAPI,
     // PostTestAPI: PostTestAPI,
     // HtmlTestAPI: HtmlTestAPI,
